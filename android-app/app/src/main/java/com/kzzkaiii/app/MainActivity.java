@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
 
     private void prepareSite(File root) throws IOException {
         File site = new File(root, "telechargement");
+        new File(root, "cache").mkdirs();
         SharedPreferences prefs = getSharedPreferences("kzzkaiii", MODE_PRIVATE);
         long version = getInstalledVersion();
         if (prefs.getLong("site_version", -1) == version && new File(site, "index.html").isFile()) {
