@@ -1,5 +1,5 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="#080A12" />
+    <item android:drawable="@color/app_background" />
     <item
         android:width="112dp"
         android:height="112dp"
