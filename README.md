@@ -80,4 +80,4 @@ Depois, abra `http://localhost:8907/`. Para obter arquivos ausentes durante a pr
 
 ---
 
-**Status:** interface web adaptada e estrutura Android adicionada; APK em compilação/validação.
+**Status:** interface web adaptada; APK Android de depuração compilado com sucesso em 09/11/2026. Teste em aparelho físico pendente.
