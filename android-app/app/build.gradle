@@ -48,6 +48,17 @@ tasks.register("syncKzzKaiiiPython", Copy) {
     into("$projectDir/src/main/python")
 }
 
+// Declare direct dependencies as well: Chaquopy merges Python sources before
+// the Android preBuild task, so a preBuild-only dependency is too late.
+tasks.configureEach {
+    if (name.endsWith("PythonSources")) {
+        dependsOn("syncKzzKaiiiPython")
+    }
+    if (name.endsWith("Assets")) {
+        dependsOn("syncKzzKaiiiSite")
+    }
+}
+
 tasks.named("preBuild").configure {
     dependsOn("syncKzzKaiiiSite", "syncKzzKaiiiPython")
 }
