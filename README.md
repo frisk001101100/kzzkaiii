@@ -1,243 +1,75 @@
-# Volt Maps — miroir hors ligne du player WebGL Reborn
+# KzzKaiii — Volt Maps
 
-Miroir **open source**, **100 % local**, **zéro donnée collectée** : les 80 cartes
-Subway Surfers « Enhanced » tournent sans aucune connexion. Support :
-[paypal.me/AdamMezerai](https://paypal.me/AdamMezerai).
+Fork pessoal do **Volt Maps**, organizado para evoluir em uma experiência própria para Android.
 
-## Installer
+O projeto mantém como base o espelho local do player Subway Surfers WebGL Reborn. Esta cópia é um trabalho em andamento: a prioridade é preservar o funcionamento do projeto original antes de adicionar mudanças na interface e no empacotamento.
+
+> **Créditos:** projeto-base criado por Volt. Este repositório é uma cópia modificada para uso e desenvolvimento pessoal. Os créditos e avisos dos autores originais devem ser preservados.
+
+## Estado atual
+
+Recursos já presentes na base recebida:
+
+- Launcher web com galeria e seleção de mapas.
+- Modo Enhanced e rotas de jogo disponíveis na base.
+- Modo Pogo em mapas compatíveis.
+- Modo Training — atualmente documentado para Beijing.
+- Timer integrado ao jogo, com eventos de início de partida, coleta de moeda, morte e pausa.
+- Cache local para reutilizar arquivos já baixados.
+
+**Cobertura documentada pela versão-base:** 81 mapas jogáveis de 96 listados. A disponibilidade varia por mapa e por conteúdo existente no projeto.
+
+## Próximos objetivos
+
+Estes itens são metas de desenvolvimento, não funcionalidades já entregues:
+
+- [ ] Criar uma interface própria para o launcher.
+- [ ] Preparar uma versão Android instalável (APK).
+- [ ] Organizar os modos Original e Training na experiência mobile.
+- [ ] Adaptar o timer para telas sensíveis ao toque e controles mobile.
+- [ ] Testar inicialização, cache e funcionamento offline no Android.
+
+## Execução local
+
+A base atual usa Python para iniciar o servidor local:
 
 ```bash
-python3 installe.py                 # installe / répare (idempotent) + vérifie un boot
-python3 installe.py --prechauffer   # + met en cache les cartes (~1-2 h en ligne)
-```
-
-## Démarrer le serveur
-
-```bash
+python3 installe.py
 python3 serve_localhost.py 8907
 ```
 
-Hors ligne par défaut (`ONLINE=1` réautorise le réseau en secours). Puis ouvrir
-**http://localhost:8907/** (hostname littéral `localhost` exigé par le moteur).
-
-### Cartes
+Depois, abra:
 
 ```
-http://localhost:8907/<carte>/reborn/enhanced   ex. /paris/reborn/enhanced
-http://localhost:8907/pogo/<carte>/?mode=pogo   ex. /pogo/transylvania/
-http://localhost:8907/training/<slug>/          ex. /training/beijing/
+http://localhost:8907/
 ```
 
-96 slugs dans le listing, **81 jouables** (les autres : slugs APK historiques +
-`rio-de-janeiro` qui casse le SPA). Hors ligne : `journey-to-the-east` (jamais
-rapatrié) et `miami` (contenu supprimé en amont) ne fonctionnent pas.
+O hostname `localhost` é importante para o funcionamento esperado do player. A instalação e o pré-carregamento de mapas podem exigir conexão com a internet.
 
-### Mode Pogo (builds ashuni.lol, ajout du 20 sept. 2026)
+## Timer
 
-26 cartes proposent en plus un mode **Pogo** : un badge ambre `POGO` sur la
-carte de la galerie, un 3ᵉ choix dans la modale, et une route
-`/<carte>/reborn/pogo` qui redirige vers `/pogo/<slug>/?mode=pogo` (page de jeu
-dédiée). Builds récupérés d'ashuni.lol — deux architectures :
+O projeto-base inclui `telechargement/tro-timer.js`. O timer recebe eventos do jogo para acompanhar o estado da partida, incluindo início, pausa, retomada, coleta de moeda e fim de run. A interface e os controles ainda precisam ser validados em dispositivos Android.
 
-- **reborn** (transylvania) : `reborn.json` + loader/framework/wasm/data parts
-  bootés par `createUnityInstance`, data parts fusionnées en blob ;
-- **classic** (25 autres) : builds Unity 2018/2019 pilotés par
-  `UnityLoader.2019.2.js` (version ashuni patchée pour les builds
-  « modularisés ») + un manifest `build.json`. Quatre variantes de loader
-  modularisé selon les cartes : `4399.js`, `4399.z.js`, `4399.sf.js`,
-  `subwaySurf14.08.js` ; miami est un build standard.
+## Estrutura importante
 
-Points clés :
+| Caminho | Função |
+| --- | --- |
+| `telechargement/` | Launcher, páginas e arquivos do player |
+| `telechargement/tro-timer.js` | Timer integrado |
+| `serve_localhost.py` | Servidor local |
+| `installe.py` | Instalação e verificação |
+| `pogo_outils.py` | Ferramentas do modo Pogo |
+| `training_outils.py` | Ferramentas do modo Training |
 
-- le **mode pogo est choisi par le build via l'URL de la page**
-  (`?mode=pogo`, forcé par `commun.js`) — aucun parsing du mode n'existe
-  côté page ;
-- `sauvegarde.bin` (13 971 octets) : la sauvegarde embarquée d'ashuni
-  (personnages débloqués, ~996 M pièces, pas de tuto) est injectée dans le FS
-  Emscripten au `preRun` (`sauvegarde.js`, md5 des variantes d'URL — portage
-  de leur « save100 ») ; sans elle, jeu vierge + tutoriel ;
-- `commun.js` fournit aussi : SDK Poki factice (stub officiel d'ashuni),
-  pont `initPokiBridge`/`commercialBreak`/`rewardedBreak`, décompression
-  tolérante gzip/brotli/clair, neutralisation des overlays « site officiel »
-  et blocage des redirections vers tavvkkj.xyz/ashuni.lol ;
-- les replis asm.js (`*.asm.*.unityweb`) ne sont PAS rapatriés (bangkok,
-  cairo, paris) : tous les navigateurs modernes passent par wasm ;
-- **« pogo au sol » désactivé (21 sept.)** : les pickups PogoStick ont été
-  neutralisés dans les 26 builds (`pogo_outils.py nospawn` — poids du tirage
-  `PickupManager` → 0 + `PickupSpawnPoint` forcés désactivés, backups
-  `*.bak-original`). Le pogo reste accessible via la touche configurable
-  (défaut P, `Game.StartPogostick`) et Espace sur transylvania ;
-- **bouton « Réparer »** (`commun.js` v4) : sur erreur fatale au chargement
-  (cache/idbfs corrompu), un bouton efface localStorage + IndexedDB + Cache
-  Storage de l'origine puis recharge la page ;
-- outil : `python3 pogo_outils.py inventaire|telecharger|pages|nospawn`.
+## Avisos e licenças
 
-### Mode Training (builds du repo « Map-training- », ajout du 23 sept. 2026)
+- Este repositório deriva do **Volt Maps**; consulte o projeto de origem para histórico, autoria e condições de uso.
+- Subway Surfers e seus elementos de jogo pertencem aos respectivos titulares, incluindo a SYBO Games.
+- Não presuma que os arquivos de jogo, mapas, builds ou recursos de terceiros possam ser redistribuídos ou hospedados publicamente. Respeite as permissões e licenças aplicáveis.
+- A criação do APK e as alterações listadas em “Próximos objetivos” ainda não estão concluídas.
 
-Les maps training auto-portées du repo GitHub privé du dev sont servies
-depuis `/training/<slug>/` (page Poki + `master-loader.js` + `Build/`) :
+---
 
-- pour l'instant : **beijing** (44 Mo) — la modale de la galerie envoie le
-  bouton « Training » de beijing vers `/training/beijing/` (table
-  `TRAINING_MAPS` dans `telechargement/index.html`) ; les autres cartes
-  gardent le mode training du launcher enhanced ;
-- le `master-loader.js` du repo référence `loaderContainer` sans le déclarer
-  (ReferenceError au démarrage) : le fix est réappliqué à chaque synchro ;
-- règle de cache identique à /pogo/ : builds `immutable` 30 j, pages et
-  manifests `no-cache` ;
-- outil : `python3 training_outils.py recuperer|inventaire` (clone le repo
-  avec le PAT du remote volt-maps, jamais écrit en clair).
-
-## Ce que fait le serveur (`serve_localhost.py`)
-
-- Sert la **copie locale** du site (`telechargement/`, ~900 Mo : pages, build
-  Unity partagé, contenu des cartes, vignettes, configs).
-- Résout les URLs propres du SPA et les routes de jeu `/<carte>/reborn/<mode>`.
-- **Cache disque persistant** (`cache/`) : premier accès réseau → stocké, puis
-  servi du disque (`X-Cache: HIT`). Recherche tolérante au paramètre `?troCors`.
-- **Activation 100 % locale** : `POST /reborn-api/v1/activate` est intercepté par
-  `activation_locale.py` (enveloppe rejouée du cache + jeton re-minté signé par
-  la clé locale). `ACTIV_RESEAU=1` restaure le proxy amont.
-- **CORS réflexif** (une partie du JS construit des URLs localhost en dur).
-
-## Chaîne de démarrage d'une carte
-
-1. `assetDelivery: "same-origin-protected-streaming"` (le patch « standard » casse
-   le handshake).
-2. `assets/W4C2wK_u.js` : validation des URLs (`kc()`) élargie à `/builds/shared/`
-   et `/reborn/content/`.
-3. Activation locale : enveloppe de contenu **rejouée** depuis la réponse en cache
-   (chiffrée pour le handshake ECDH fixe du SW) + jeton reconstruit (nonce Unity
-   courant, `iat`/`exp` frais) **signé par la clé locale** (`cle_activation.json`).
-4. `telechargement/index.html` (launcher) : hooks fetch/XHR + `window.open`
-   (redirection du bouton du popup vers PayPal), pont
-   `__TAVVKKJ_REBORN_LAUNCH__` qui :
-   - aligne le **nonce du moteur** sur le claim du jeton servi (réécriture UTF-8 /
-     UTF-16 dans le tas) ;
-   - délivre l'enveloppe au service worker puis un receipt **minimal** au moteur ;
-   - `__TVK_ENV__.dateNow` natif (une horloge figée bloque le chargement, un saut
-     d'horloge casse la validation — le moteur ne vérifie pas l'expiration).
-5. Framework `reborn-shared.framework.js.br` (**JS en clair**) patché :
-   - `_VoltmapsEnvSurface`/`_VoltmapsEnvProbe` neutralisés ;
-   - `_ReconstructedRuntimeGetNowSeconds` et `_emscripten_date_now` routés vers
-     `__TVK_ENV__.dateNow` ;
-   - bouton du popup : `location.assign` vers PayPal ;
-   - incrémenter `?v=N` sur `frameworkUrl` (et `dataUrl`) après chaque édition
-     (UnityCache).
-6. Contenu TVKSPK1 déchiffré par le SW (clés de l'enveloppe, handshake ECDH fixe
-   `raw/cle_ec_fixe.json`).
-
-## Timer natif LiveSplit (portage de tavvkkj.xyz)
-
-`telechargement/tro-timer.js` (chargé par `index.html` sur les routes
-`/<carte>/reborn/<mode>`) reprend la logique du « Cronômetro nativo » intégré
-au jeu sur tavvkkj.xyz :
-
-- **pilotage par le jeu lui-même** : le framework du build expose
-  `_RebornTimerEvent` qui émet `tro:unity-runtime-event` ; départ sur
-  `reborn:runStarted`, pause « mort » sur `reborn:playerDied` / `saveMeShown` /
-  `runEnded` / `gameEnded`, pause « pièce » sur `reborn:coinCollected`
-  (anti-rebond 380 ms après le départ, 220 ms entre signaux), pause sur
-  `reborn:pause`, reprise sur `reborn:runResumed` (ou `reborn:resume` si la
-  pause venait du jeu, après un délai de grâce 450 ms) ;
-- **machine à états LiveSplit** (NotRunning/Running/Paused/Ended) : split,
-  undo, reset, pause ; anti double-pression 300/600 ms ; retard configurable ;
-- **raccourcis par défaut** Numpad1 (iniciar/split), Numpad3 (resetar),
-  Numpad2 (pular — sans effet, comme l'original), Numpad8 (desfazer),
-  capturables depuis le menu ;
-- **rendu canvas identique** (Century Gothic, dégradé de texte, ombres,
-  couleurs par phase, formats 1 / 00:01 / 0:00:01, précision .2 / .23 / .234) ;
-- **interactions** : glisser pour déplacer, bords ou Maj+glisser pour
-  redimensionner (50–500 × 20–150), double-clic = reset, clic = menu
-  d'options (Ações / Básico / Auto / Overlay / Render / Aparência / Atalhos) ;
-- **popup externe** Document Picture-in-Picture « TRO Timer » ;
-- **réglages dans `tro_settings_v1`** (sous-arbre `nativeTimer`) — la même clé
-  que tavvkkj.xyz : un joueur qui règle son timer là-bas retrouve ses
-  réglages ici, et réciproquement. Les autres clés du JSON sont préservées.
-
-## Scripts
-
-| script | rôle |
-|---|---|
-| `installe.py` | installation/réparation complète |
-| `serve_localhost.py` | serveur local hors ligne par défaut |
-| `boot_test.py <slug>` | boot complet + capture `raw/boot_*.png` |
-| `prechauffage.py` | remplit les caches (reprise via `raw/prechauffe_etat.json`) |
-| `mesure_fps.py` | chargement + FPS par carte |
-| `diag_boot.py` | diagnostic d'un boot bloqué |
-| `activation_locale.py` | activation locale (enveloppe + jeton) |
-| `pogo_outils.py` | cartes pogo : inventaire / téléchargement / génération des pages / nospawn |
-| `training_outils.py` | maps training du repo GitHub : synchro / inventaire |
-| `audit_boot.py` | audit du miroir déployé : galerie + boot training + boot pogo |
-| `changer_texte_popup.py` | personnalise le popup d'avertissement (toutes langues) |
-| `chasse_cle.py` / `brute_force_cle.py` | recherche de la clé publique embarquée (archive) |
-
-## Pièges connus
-
-- Ne pas relancer `patch_urls.py` tel quel.
-- Chunks minifiés : **aucun commentaire `//`** ; vérifier via
-  `node --check`.
-- Après édition du framework/SW : purger le profil + incrémenter `?v=N`
-  (`frameworkUrl`, `dataUrl`) — UnityCache indexe par URL.
-- **Ne jamais geler `Date.now` globalement** (loader bloqué) ni sauter l'horloge
-  (`activation_timeout` / `activation_expired`). Le moteur valide la cohérence
-  `receipt.unityNonce` ↔ nonce envoyé ↔ claim du jeton ; la signature est
-  vérifiée (jeton du vrai gateway = valide).
-- Gros `.br` : wasm/data non compressés, framework = JS brut.
-- Serveur à lancer **détaché** (`setsid nohup … &`).
-
-## Écran gris après chargement — diagnostic (13 sept. 2026)
-
-Trois causes distinctes, toutes corrigées dans `telechargement/index.html` :
-
-1. **IP LAN en HTTP** (`http://192.168.1.87:8907`) : pas un contexte sécurisé →
-   le moteur refuse (`Insecure connection not allowed`, string du wasm) et le
-   SW de déchiffrement ne peut pas s'enregistrer. **Correctif** : le launcher
-   redirige automatiquement vers le tunnel `https://nocoin.webtvmedia.net`
-   (seul `localhost` reste servi en direct).
-2. **Geste utilisateur attendu** : après « Installed N scene delta root(s) »,
-   le player attend un vrai clic (politique audio + popup « site non
-   officiel » dessiné par le jeu) avant de dessiner le menu — sans lui, canvas
-   gris figé. **Correctif** : invite « ▶ Click in the game to start »
-   (`#invite-demarrage`), purement visuelle, masquée dès l'événement
-   `reborn:menuShown` (écouté sur `window`, PAS `document`).
-3. **Launcher « instrumenté » (shim AudioContext, `devicePixelRatio: 1`,
-   `__TVK_ENV__` horloge alignée…)** : le moteur démarrait (`menuShown` émis)
-   mais le **rendu restait figé**. Le launcher simple (celui de ce dépôt)
-   rend le jeu normalement via le tunnel comme en local. La sauvegarde du
-   launcher instrumenté est `index.html.avant-fix-ecran-gris` sur le serveur.
-
-Vérifié le 13 sept. via tunnel : galerie → carte → menu rendu → partie
-complète (runs, pièces, game over) sur Paris ; menu animé sur Tokyo ;
-redirection LAN → tunnel active.
-
-## Déploiement LAN
-
-```bash
-rsync -az --exclude .profil_nav --exclude raw ./ volt@192.168.1.87:~/voltmaps/
-ssh volt@192.168.1.87 'cd ~/voltmaps && setsid nohup python3 serve_localhost.py 8907 &'
-```
-
-## Tunnel Cloudflare (nocoin.webtvmedia.net)
-
-`cloudflared` doit être installé **et connecté** au compte Cloudflare du domaine :
-
-```bash
-cloudflared tunnel login
-cloudflared tunnel create nocoin
-cloudflared tunnel route dns nocoin nocoin.webtvmedia.net
-cloudflared tunnel run --url http://localhost:8907 nocoin
-```
-
-## Résultats
-
-81/96 cartes jouables ; hors ligne validé sur paris, tokyo, classic,
-winter-holiday, beijing-cn, space-station, underwater, new-york, seoul,
-haunted-hood, sydney, bali, copenhagen-super-runner, journey-through-china-cn
-(menu **et** gameplay : partie lancée, score enregistré). Chargement ~3 s,
-FPS moyen 48,9. Détails : `RAPPORT.md`, `raw/fps_cartes.json`.
-
-## Licence / crédits
-
-- Code du miroir : open source, made by volt.
-- Contenu du jeu © SYBO Games — usage strictement personnel, ne pas héberger.
+**Projeto:** KzzKaiii  
+**Base:** Volt Maps  
+**Status:** em desenvolvimento
