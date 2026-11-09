@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volt Maps · offline mirror</title>
-<meta name="description" content="Volt Maps — open source mirror of the Reborn WebGL player. 100% local, no data collected.">
-  <link rel="icon" href="/favicon.webp?v=4">
+<title>KzzKaiii · mapas e modos</title>
+<meta name="description" content="KzzKaiii — launcher mobile de mapas, modos de jogo e cronômetro automático.">
+  <meta name="theme-color" content="#080a12">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/kzzkaiii-icon.svg">
+  <link rel="stylesheet" href="/kzzkaiii.css?v=1">
   <script src="/tro-timer.js?v=3" defer></script>
 <style>
   /* ——— Volt Maps · thème « cartouche arcade » — fond encre, accent ambre, typographie pressée ——— */
@@ -528,56 +532,59 @@
 <div id="vue-galerie">
   <header>
     <a class="wordmark" href="/">
-      <span class="bloc">VOLT</span>
-      <span class="suite">MAPS</span>
+      <span class="bloc">KZ</span>
+      <span><span class="suite">KZZKAIII</span><small>MAP RUNNER</small></span>
     </a>
     <div class="zone-recherche">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
         <circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/>
       </svg>
-      <input id="recherche" type="search" placeholder="search a map…" autocomplete="off">
+      <input id="recherche" type="search" placeholder="Buscar mapa…"/ autocomplete="off">
     </div>
     <span id="compteur" style="display:none"></span>
   </header>
 
+
+  <section class="hero-kz" aria-label="KzzKaiii">
+    <div class="hero-kz-inner">
+      <div class="eyebrow">KZZKAIII · MAP RUNNER</div>
+      <h1>Seu próximo<br><span>run começa aqui.</span></h1>
+      <p>Escolha um mapa, selecione o modo e acompanhe sua partida com o cronômetro integrado. Uma experiência pensada para celular.</p>
+      <div class="hero-kz-pills"><span>◈ Enhanced / Original</span><span>◈ Training</span><span>◈ Pogo</span><span>◷ Timer automático</span></div>
+    </div>
+  </section>
+
   <main>
     <div class="tete-grille">
-      <h2>Library <em>— all maps</em></h2>
+      <h2>Biblioteca <em>— todos os mapas</em></h2>
       <div class="aide">
-        <span><kbd>/</kbd> search</span>
-        <span><kbd>esc</kbd> quit a run</span>
+        <span><kbd>/</kbd> buscar</span>
+        <span>Toque em um mapa para escolher o modo</span>
       </div>
     </div>
     <div id="filtres"></div>
     <div id="grille"></div>
-    <div id="vide" hidden>No map matches your search.</div>
+    <div id="vide" hidden>Nenhum mapa corresponde à busca.</div>
   </main>
 
   <footer>
     <div class="cols">
       <div>
-        <h3>Open source project</h3>
-        <p>Volt Maps is a community mirror of the Reborn WebGL player.
-           No account, no trackers, no data collected: everything runs on your
-           machine, fully offline.</p>
-        <p>Maps come from the official game content and remain the property
-           of their respective owners.</p>
+        <h3>Sobre o KzzKaiii</h3>
+        <p>Um launcher independente baseado no projeto Volt Maps, com foco em navegação mobile, seleção de mapas e cronômetro integrado.</p>
+        <p>Os mapas e elementos do jogo pertencem aos seus respectivos titulares.</p>
       </div>
       <div>
-        <h3>Support</h3>
-        <p>The mirror is free and will stay that way. If it serves you,
-           a donation helps keep it alive.</p>
-        <a class="lien-don" href="https://paypal.me/AdamMezerai" target="_blank" rel="noopener">Donate — paypal.me/AdamMezerai</a>
+        <h3>Recursos</h3>
+        <p>Modos Enhanced, Training e Pogo quando disponíveis para o mapa. Timer automático com ajustes próprios.</p>
       </div>
       <div>
-        <h3>Technical</h3>
-        <p>Player <code>reborn-shared-enhanced-local</code> · decryption service
-           worker · persistent disk cache · locally signed activation.</p>
-        <p>Playable modes: <b>Enhanced</b> (unified build) and <b>Training</b>.</p>
+        <h3>Compatibilidade</h3>
+        <p>Interface adaptada para celular. O conteúdo de jogo exige os arquivos e serviços correspondentes; o modo offline depende de mapas previamente armazenados.</p>
       </div>
     </div>
     <div class="bas">
-      <span>contenu du jeu © SYBO Games · miroir made by volt</span>
+      <span>KzzKaiii · projeto derivado do Volt Maps · conteúdo do jogo © seus titulares</span>
     </div>
   </footer>
 </div>
@@ -586,24 +593,24 @@
 <div id="modale" hidden>
   <div class="feuille">
     <h3 id="modale-nom">Carte</h3>
-    <p class="sous">Pick the version to launch — each mode has its own URL.</p>
+    <p class="sous">Escolha o modo de jogo para este mapa.</p>
     <a class="choix" id="choix-enhanced" href="#">
       <span class="ico">E+</span>
       <span><span class="t">Enhanced</span>
-      <div class="d">The enhanced edition — the full game, just like the original site.</div></span>
+      <div class="d">Jogue a versão principal disponível para este mapa.</div></span>
     </a>
     <a class="choix" id="choix-training" href="#">
       <span class="ico">T</span>
       <span><span class="t">Training</span>
-      <div class="d">Training mode: learn the tracks and tricks.</div></span>
+      <div class="d">Treine rotas e movimentos nos mapas compatíveis.</div></span>
     </a>
     <a class="choix" id="choix-pogo" href="#" hidden>
       <span class="ico">P</span>
       <span><span class="t">Pogo</span>
-      <div class="d">Pogo mode — ride the pogo stick!</div></span>
+      <div class="d">Modo Pogo nos mapas compatíveis.</div></span>
     </a>
     <div class="rang-actions">
-      <button class="btn btn-secondaire" id="modale-fermer">Cancel</button>
+      <button class="btn btn-secondaire" id="modale-fermer">Fechar</button>
     </div>
   </div>
 </div>
@@ -613,28 +620,27 @@
   <canvas id="unity-canvas"></canvas>
 
   <div id="chargement">
-    <div class="titre" id="titre-chargement">Loading…</div>
+    <div class="titre" id="titre-chargement">Carregando…</div>
     <div class="piste"><div id="barre"></div></div>
-    <div id="statut">Preparing…</div>
+    <div id="statut">Preparando…</div>
   </div>
 
   <div id="invite-demarrage" aria-hidden="true">
     <div class="panneau-invite">
-      <div class="titre-invite">▶ Click in the game to start</div>
-      <div class="texte-invite">After loading, the engine waits for a real click
-        before drawing the menu. If a warning popup appears, close it (✕) then click.</div>
+      <div class="titre-invite">▶ Toque no jogo para começar</div>
+      <div class="texte-invite">Depois de carregar, toque na tela para abrir o menu do jogo. Se aparecer um aviso, feche-o e toque novamente.</div>
     </div>
   </div>
 
   <div id="erreur" hidden>
     <div class="panneau-erreur">
-      <h2>Unable to launch the map</h2>
+      <h2>Não foi possível abrir o mapa</h2>
       <p id="message-erreur"></p>
       <pre id="journal"></pre>
       <div class="rang-actions">
-        <button class="btn btn-primaire" id="btn-reessayer">Retry</button>
-        <button class="btn btn-secondaire" id="btn-vider">Clear Unity cache</button>
-        <button class="btn btn-secondaire" id="btn-retour2">Back to maps</button>
+        <button class="btn btn-primaire" id="btn-reessayer">Tentar novamente</button>
+        <button class="btn btn-secondaire" id="btn-vider">Limpar cache do jogo</button>
+        <button class="btn btn-secondaire" id="btn-retour2">Voltar aos mapas</button>
       </div>
     </div>
   </div>
