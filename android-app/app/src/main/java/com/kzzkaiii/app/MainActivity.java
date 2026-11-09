@@ -129,9 +129,16 @@ public class MainActivity extends Activity {
     }
 
     private void startPythonServer(File root) {
-        if (!Python.isStarted()) Python.start(new AndroidPlatform(getApplicationContext()));
-        PyObject bootstrap = Python.getInstance().getModule("android_bootstrap");
-        bootstrap.callAttr("start_server", root.getAbsolutePath(), SERVER_PORT);
+        Thread serverThread = new Thread(() -> {
+            try {
+                if (!Python.isStarted()) Python.start(new AndroidPlatform(getApplicationContext()));
+                PyObject bootstrap = Python.getInstance().getModule("android_bootstrap");
+                bootstrap.callAttr("start_server", root.getAbsolutePath(), SERVER_PORT);
+            } catch (Exception error) {
+                showFatalError(error);
+            }
+        }, "kzzkaiii-local-server");
+        serverThread.start();
     }
 
     private void waitForServer() {
